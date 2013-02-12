@@ -1,0 +1,9 @@
+.installed.cfg
+.vagrant
+bin
+develop-eggs/
+env1/
+*.pyc
+src/
+produciton.config
+.parts/
