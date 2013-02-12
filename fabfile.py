@@ -20,6 +20,16 @@ def vagrant(name=''):
 
 
 @task
+def prod():
+    env['user'] = 'root'
+    env['hosts'] = ['harobed-vs1.stephane-klein.info']
+    env['port'] = '2225'
+
+    env['mysql_user'] = 'root'
+    env['mysql_password'] = os.environ.get('MYSQL_PASSWORD', 'password')
+
+
+@task
 def piwik_config():
     env['piwik'] = {
         'unix_user': 'piwik',
@@ -81,6 +91,7 @@ def _add_user(*args, **kwargs):
 
 @task
 def install_piwik():
+    require.deb.packages(['sudo'])
     if 'piwik' not in env:
         puts('"piwik" configuration missing in env variable, append "piwik_config" task')
         return
@@ -151,14 +162,14 @@ def install_piwik():
     br.open('http://%s/index.php?action=systemCheck' % env['piwik']['url'])
     br.open('http://%s/index.php?action=databaseSetup' % env['piwik']['url'])
     br.select_form(name="databasesetupform")
-    br['host'] = '127.0.0.1'
+    br['host'] = 'localhost'
     br['username'] = env['piwik']['database_user']
     br['password'] = env['piwik']['database_password']
     br['dbname'] = env['piwik']['database_name']
     br['tables_prefix'] = 'piwik_'
     br['adapter'] = ['PDO_MYSQL']
-
     br.submit()
+
     br.open('http://%s/index.php?action=generalSetup&module=Installation' % env['piwik']['url'])
     br.select_form(name="generalsetupform")
     br['login'] = env['piwik']['piwik_admin_user']
